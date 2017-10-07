@@ -3,3 +3,4 @@ cp /home/ben/projectgit/apache2.conf /etc/apache2/apache2.conf
 cp /home/ben/projectgit/apache.crt /etc/apache2/cert/apache.crt
 cp /home/ben/projectgit/apache.key /etc/apache2/cert/apache.key
 cp /home/ben/projectgit/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
+cp /home/ben/projectgit/000-default.conf /etc/apache2/sites-enabled/000-default.conf
