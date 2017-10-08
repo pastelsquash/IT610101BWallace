@@ -1,0 +1,9 @@
+#!/bin/bash
+
+arraynum=1
+IFS=$'\t'
+echo "Within the last 5 minutes, the following browsers have visited the site:"
+echo `awk 'BEGIN {FS="\"";} {print $6}' /var/log/apache2/access.log` > temp.txt
+sort temp.txt | uniq | cat
+rm temp.txt
+
