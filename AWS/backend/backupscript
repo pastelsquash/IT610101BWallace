@@ -1,0 +1,14 @@
+#!/bin/bash
+
+user="root"
+password="Blackburn5309"
+host=""
+db_name="test_database"
+
+backup_path="/home/ubuntu/mysql"
+date=$(date +"%d-%b-%Y")
+
+umask 177
+
+mysqldump --user=$user --password=$password --host=$host $db_name > $backup_path/$db_name-$date.sql
+find $backup_path/* -mtime +7 -exec rm {} \;

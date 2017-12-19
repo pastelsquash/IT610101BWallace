@@ -1,0 +1,174 @@
+# SETTING UP THE FRONT-END SERVER
+
+###1. Installing and setting up Git
+	sudo apt-get update
+	sudo apt-get install git
+
+	(from home folder)
+	mkdir projectgit
+	cd projectgit
+	git clone https://github.com/pastelsquash/IT610101BWallace.git
+	sudo mv IT610101BWallace/* .
+
+###2. Installing Necessary Dependencies
+#### APACHE-------
+	sudo apt-get install apache2
+	sudo ufw allow in "Apache Full"
+
+	Try to connect to http://ec2-18-217-25-112.us-east-2.compute.amazonaws.com in a local web browser
+	If this fails, open up the necessary ports (80 and 443) in AWS
+
+	sudo /usr/sbin/update-rc.d apache2 defaults
+
+#### MYSQL-------
+	sudo apt-get install mysql-server
+		(set a password of your choice)
+
+####	PHP-------
+	sudo apt-get install php libapache2-mod-php php-mcrypt php-mysql
+
+
+###3. Configuring SSL and Bootstrap
+####	SSL------
+	sudo a2enmod ssl
+	sudo a2ensite default-ssl
+	sudo service apache2 restart
+
+	sudo mkdir /etc/apache2/cert
+	sudo cp ./apache.crt /etc/apache2/cert/apache.crt
+	sudo cp ./apache.key /etc/apache2/cert/apache.key
+
+####	BOOTSTRAP------
+	sudo apt-get install node.js
+	sudo apt-get install npm
+	sudo npm install -g grunt-cli
+	cd bootstrapproject
+	cd bootstrap
+	sudo npm install
+	sudo service apache2 restart
+
+	cd ../..  (move to projectgit folder)
+
+####	CONF FILES-------
+	sudo cp ./apache2.conf /etc/apache2/apache2.conf
+		Check the "<Directory /home/ben/projectgit/..." line; confirm path to projectgit is correct (your username is likely not "ben")
+	sudo cp ./default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
+		Check that DocumentRoot has proper path to projectgit (again, username is likely different)
+	sudo cp ./000-default.conf /etc/apache2/sites-enabled/000-default.conf
+		Check that DocumentRoot has proper path to projectgit
+
+
+#SETTING UP THE BACK-END SERVER
+
+###1. Installing MySQL
+	sudo apt-get update
+	sudo apt-get install mysql-server
+		(choose desired password)
+	sudo iptables -I INPUT -p tcp --dport 3306 -m state --state NEW,ESTABLISHED -j ACCEPT
+	sudo iptables -I OUTPUT -p tcp --sport 3306 -m state --state ESTABLISHED -j ACCEPT
+	sudo /usr/sbin/update-rc.d mysql defaults
+
+###2. Make an Example Database and Table
+	mysql -u root -p
+		(enter password)
+	Put in Values!
+		(Link to a tutorial)
+		Exact values unimportant
+		My values in database test_database:
+			test_table(student_id, student_name, student_major)
+			1,Ben Wallace, IT Admin
+			2,DJ Kehoe, Computer Biologies
+			3,John Cena, Art of Invisibility
+			4,Joseph Stalin,Sharing
+			5,William Shatner,The Art of the Deal
+
+###3. Cron Job
+	move to home folder (cd ~)
+	mkdir mysql
+	cd mysql
+
+	Copy the following into a file and name it "backupscript":
+
+<p>
+#!/bin/bash
+
+user="root"
+password="<password you set at initialization>"
+host=""
+db_name="<name of database you made in pt. 2>"
+
+backup_path="/home/<your username>/mysql" #<---make sure directory exists!
+date=$(date +"%d-%b-%Y")
+
+umask 177
+
+mysqldump --user=$user --password=$password --host=$host $db_name > $backup_path/$db_name-$date.sql
+find $backup_path/* -mtime +7 -exec rm {} \;
+
+</p>
+
+	chmod 755 ./backupscript
+	sudo crontab -e
+		Add this line to the bottom of file:
+			45 23 * * * /home/<your username>/mysql/backupscript
+
+	(first two numbers are the minute of hour and hour of day to do each daily backup;
+    set these to whatever you choose)
+
+
+
+
+
+#SETTING UP THE NAGIOS SERVER
+###1. Installing and setting up Git
+	sudo apt-get update
+	sudo apt-get install git
+
+	(from home folder)
+	mkdir projectgit
+	cd projectgit
+	git clone https://github.com/pastelsquash/IT610101BWallace.git
+	sudo mv IT610101BWallace/* .
+
+###2. Installing Necessary Dependencies
+	####APACHE-----
+	sudo apt-get install apache2
+	sudo ufw allow in "Apache Full"
+
+	Try to connect to Error! Hyperlink reference not valid._aws_url>.com in a local web browser
+	If this fails, open up the necessary ports (80 and 443) in AWS
+
+	sudo /usr/sbin/update-rc.d apache2 defaults
+
+	####MYSQL-------
+	sudo apt-get install mysql-server
+		(set a password of your choice)
+
+	####PHP-------
+	sudo apt-get install php libapache2-mod-php php-mcrypt php-mysql
+
+###2. Setting up Nagios Server
+	Nagios tutorial (already unzipped)
+
+	https://serverfault.com/questions/774498/failed-to-start-nagios-service-unit-nagios-service-failed-to-load-no-such-file
+
+	sudo /usr/sbin/update-rc.d nagios defaults
+
+
+#SETTING UP THE NAGIOS AGENTS
+
+###1. Install agent (Front-End and Back-End)
+
+###2. Modify commands.cfg and Add check_eth
+
+###3. Update Security Groups for ICMP
+
+###4. Setup Nagios Mail Notifications
+
+https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3/html/console_administration_guide/configuring_nagios_to_send_mail_notifications
+
+sudo apt-get install ssmtp
+
+Setup from guide: https://help.ubuntu.com/community/EmailAlerts
+
+Modify commands.cfg to use ssmtp
